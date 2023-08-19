@@ -65,8 +65,29 @@ class Parser:
         return ["https://www.reddit.com" + post for post in posts]
 
 
-    #def get_title(self, post_list):
+    def get_post_data(self, post_list):
+        """
+        Gets the data from each post in a list of posts
+        :param post_list: list of links to posts
+        :return: dictionary with the post title as a key and the post body as the value
+        """
 
+        post_dictionary = {}
+        for post_link in post_list:
+            webpage_html = self.get_page_data(post_list)
+            post_soup = self.create_soup(webpage_html)
+
+            post_title = self.get_title(post_soup)
+            post_body = self.get_body(post_soup)
+
+            post_dictionary[post_title] = post_body
+        return post_dictionary
+
+    def get_title(self, soup):
+        return None
+
+    def get_body(self, soup):
+        return None
 
     def get_comments(self, post_list, filename):
         comment_text_list = []
