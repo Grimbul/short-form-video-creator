@@ -65,7 +65,7 @@ class Parser:
         return ["https://www.reddit.com" + post for post in posts]
 
 
-    def get_title(self, post_list):
+    #def get_title(self, post_list):
 
 
     def get_comments(self, post_list, filename):
