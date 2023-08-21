@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
+from urllib import parse
 
 """
 Manages html data
@@ -11,21 +12,20 @@ class Parser:
 
     def get_page_data_file(self, url, filename):
         """
-        Writes a webpages html to a file
-        @param url: the url of the page to access
-        @param filename: the file to write the html to
+        Writes a webpage's html to a file
+        :param url: the url of the page to access
+        :param filename: the file to write the html to
         """
 
         webpage = urlopen(url).read()
         with open(filename, "wb") as writer:
             writer.write(webpage)
 
-
     def get_page_data(self, url):
         """
-        
-        @param url:
-        @return:
+        Returns the html data from a page
+        :param url: the url of the page to access
+        :return: html data of the url
         """
 
         return urlopen(url).read()
@@ -33,8 +33,8 @@ class Parser:
     def create_soup_file(self, filename):
         """
         Creates a BeautifulSoup object from a file
-        @param filename: the file to create soup from
-        @return: BeautifulSoup object
+        :param filename: the file to create soup from
+        :return: BeautifulSoup object of the file's html
         """
 
         with open(filename, "rb") as reader:
@@ -43,18 +43,17 @@ class Parser:
     def create_soup(self, webpage):
         """
         Creates a BeautifulSoup object from a webpage
-        @param webpage: the page to create soup from
-        @return: BeautifulSoup object
+        :param webpage: the page to create soup from
+        :return: BeautifulSoup object of the webpage's html
         """
 
         return BeautifulSoup(webpage, "html.parser")
 
-
     def get_post_links(self, soup):
         """
         Gets the links of all posts
-        @param soup: soup object to parse
-        @return: list of all post links on page
+        :param soup: soup object to parse
+        :return: list of all post links on page
         """
 
         posts = []
@@ -63,7 +62,6 @@ class Parser:
             if "/comments/" in link and link not in posts:
                 posts.append(link)
         return ["https://www.reddit.com" + post for post in posts]
-
 
     def get_post_data(self, post_list):
         """
@@ -84,15 +82,39 @@ class Parser:
         return post_dictionary
 
     def get_title(self, soup):
-        return None
+        """
+        Gets the title of a post from a soup object
+        :param soup: the soup of a post
+        :return: the title of the post
+        """
+
+        title_text_id = "div.font-semibold.text-neutral-content-strong"
+        post_title = ""
+
+        post_title = soup.select(title_text_id)
+        post_title = str(post_title)
+
+        return BeautifulSoup(post_title, 'html.parser').text[7:][0:-3]
 
     def get_body(self, soup):
+        """
+        Gets the body of a post from a soup object
+        :param soup: the soup of a post
+        :return: the body of the post
+        """
+
         return None
 
-    def get_comments(self, post_list, filename):
+    def get_comments(self, post_list):
+        """
+        Gets "relevant" comments from a list of posts
+        :param post_list: a list of posts
+        :return: list of relevant comments
+        """
+
         comment_text_list = []
 
-        self.get_page_data(post_list[0], filename)
+        self.get_page_data(post_list[0])
         '''
         for comment_url in comment_list:
             self.get_page_data(comment_url, filename)
@@ -110,8 +132,11 @@ if __name__ == "__main__":
     comment_file = "comment_save.html"
 
     parser = Parser()
-    parser.get_page_data_file(url_access, main_file)
+    # parser.get_page_data_file(url_access, main_file)
     page = parser.create_soup_file(main_file)
 
     titles = parser.get_post_links(page)
-    #print(parser.get_comments(titles, comment_file))
+
+    test_page_data = parser.get_page_data(titles[4])
+    test_page_soup = parser.create_soup(test_page_data)
+    print(parser.get_title(test_page_soup))
