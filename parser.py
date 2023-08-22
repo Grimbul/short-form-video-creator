@@ -88,13 +88,12 @@ class Parser:
         :return: the title of the post
         """
 
-        title_text_id = "div.font-semibold.text-neutral-content-strong"
-        post_title = ""
+        title_text_class = "div.font-semibold.text-neutral-content-strong"
 
-        post_title = soup.select(title_text_id)
-        post_title = str(post_title)
+        post_title = str(soup.select(title_text_class))
+        post_title = BeautifulSoup(post_title, 'html.parser').text
 
-        return BeautifulSoup(post_title, 'html.parser').text[7:][0:-3]
+        return post_title[1:-1].strip()
 
     def get_body(self, soup):
         """
@@ -103,7 +102,12 @@ class Parser:
         :return: the body of the post
         """
 
-        return None
+        body_text_class = "div.text-neutral-content.md"
+
+        post_body = str(soup.select(body_text_class))
+        post_body = BeautifulSoup(post_body, 'html.parser').text
+
+        return post_body[1:-1].strip()
 
     def get_comments(self, post_list):
         """
@@ -132,11 +136,11 @@ if __name__ == "__main__":
     comment_file = "comment_save.html"
 
     parser = Parser()
-    # parser.get_page_data_file(url_access, main_file)
+    #parser.get_page_data_file(url_access, main_file)
     page = parser.create_soup_file(main_file)
 
     titles = parser.get_post_links(page)
 
     test_page_data = parser.get_page_data(titles[4])
     test_page_soup = parser.create_soup(test_page_data)
-    print(parser.get_title(test_page_soup))
+    print(parser.get_body(test_page_soup))
