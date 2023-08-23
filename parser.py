@@ -57,11 +57,13 @@ class Parser:
         """
 
         posts = []
+
         for link in soup.find_all('a'):
-            link = link.get('href')
-            if "/comments/" in link and link not in posts:
+            link = str(link.get('href'))
+            if "/comments/" in link:
                 posts.append(link)
-        return ["https://www.reddit.com" + post for post in posts]
+
+        return ["https://www.old.reddit.com" + post for post in posts]
 
     def get_post_data(self, post_list):
         """
@@ -131,7 +133,7 @@ class Parser:
 
 
 if __name__ == "__main__":
-    url_access = "https://www.reddit.com/r/AmItheAsshole/"
+    url_access = "https://old.reddit.com/r/AmItheAsshole/"
     main_file = "web_page.html"
     comment_file = "comment_save.html"
 
@@ -140,7 +142,8 @@ if __name__ == "__main__":
     page = parser.create_soup_file(main_file)
 
     titles = parser.get_post_links(page)
+    print(titles)
 
-    test_page_data = parser.get_page_data(titles[4])
-    test_page_soup = parser.create_soup(test_page_data)
-    print(parser.get_body(test_page_soup))
+    #test_page_data = parser.get_page_data(titles[4])
+    #test_page_soup = parser.create_soup(test_page_data)
+    #print(parser.get_body(test_page_soup))
