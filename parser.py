@@ -1,4 +1,6 @@
 import time
+import urllib.error
+
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
 
@@ -9,6 +11,32 @@ Manages html data
 
 class Parser:
 
+    def http_error_handler(self, url):
+        """
+        Handles errors from accessing a url
+        :param url: the url to access
+        :return: the webpage's bytes
+        """
+
+        MAX_ATTEMPTS = 5
+
+        # Error types
+        TOO_MANY_REQUESTS = 429
+        GATEWAY_TIMEOUT = 504
+
+        for i in range(1, MAX_ATTEMPTS):
+            try:
+                return urlopen(url, timeout=20).read()
+
+            except urllib.error.HTTPError as error:
+                if error.code == TOO_MANY_REQUESTS:
+                    print(f"Error 429, too many requests. Retry number {i}")
+                    time.sleep(20)
+
+                elif error.code == GATEWAY_TIMEOUT:
+                    print(f"Error 504, gateway timeout. Retry number {i}")
+                    time.sleep(20)
+
     def get_page_data_file(self, url, filename):
         """
         Writes a webpage's html to a file
@@ -16,7 +44,7 @@ class Parser:
         :param filename: the file to write the html to
         """
 
-        webpage = urlopen(url, timeout=10).read()
+        webpage = self.http_error_handler(url)
         with open(filename, "wb") as writer:
             writer.write(webpage)
 
@@ -27,7 +55,7 @@ class Parser:
         :return: html data of the url
         """
 
-        return urlopen(url, timeout=100).read()
+        return self.http_error_handler(url)
 
     def create_soup_file(self, filename):
         """
@@ -129,14 +157,6 @@ class Parser:
         comment_text_list = []
 
         self.get_page_data(post_list[0])
-        '''
-        for comment_url in comment_list:
-            self.get_page_data(comment_url, filename)
-            comment_page = self.create_soup(filename)
-
-            comment_text = comment_page.find_all(attrs={"data-testid": "comment"})
-            comment_text_list.append(comment_text)
-        '''
         return comment_text_list
 
     def get_post_data(self, post_list):
@@ -147,7 +167,6 @@ class Parser:
         """
 
         post_dictionary = {}
-        x = 0
         for post_link in post_list:
             webpage_html = self.get_page_data(post_link)
             post_soup = self.create_soup(webpage_html)
@@ -156,29 +175,36 @@ class Parser:
             post_body = self.get_body(post_soup)
 
             post_dictionary[post_title] = post_body
-            x += 1
-            print(x)
+            print(len(post_dictionary))
         return post_dictionary
 
-    def write_dic(self, dict):
-        with open("temp_text.txt", 'w') as writer:
-            for key in dict:
-                writer.write(key)
-                writer.write(dict[key])
+    def save_posts(self, post_dictionary, save_file):
+        """
+        Neatly writes the posts to a file
+        :param post_dictionary: dictionary of posts, title:body
+        :param save_file: file to write posts to
+        """
+
+        with open(save_file, 'w') as writer:
+            for title in post_dictionary:
+                body = post_dictionary[title]
+
+                writer.write(title + "\n")
+                writer.write(body + "\n\n")
 
 
 if __name__ == "__main__":
     url_access = "https://old.reddit.com/r/AmItheAsshole/"
     main_file = "web_page.html"
     comment_file = "comment_save.html"
+    save_file = "temp_text.txt"
 
     parser = Parser()
     # parser.get_page_data_file(url_access, main_file)
     page = parser.create_soup_file(main_file)
 
-    post_links_array = parser.get_post_links(page)
+    post_links_list = parser.get_post_links(page)
     # print(post_links_array)
     # test_page_data = parser.get_page_data(titles[3])
     # test_page_soup = parser.create_soup(test_page_data)
-    parser.write_dic(parser.get_post_data(post_links_array))
-
+    parser.save_posts(parser.get_post_data(post_links_list), save_file)
