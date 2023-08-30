@@ -1,6 +1,5 @@
 import time
 import urllib.error
-
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
 
@@ -13,7 +12,7 @@ class Parser:
 
     def http_error_handler(self, url):
         """
-        Handles errors from accessing a url
+        Handles errors from accessing an url
         :param url: the url to access
         :return: the webpage's bytes
         """
@@ -197,14 +196,15 @@ if __name__ == "__main__":
     url_access = "https://old.reddit.com/r/AmItheAsshole/"
     main_file = "web_page.html"
     comment_file = "comment_save.html"
-    save_file = "temp_text.txt"
+    post_save_file = "temp_text.txt"
 
     parser = Parser()
+
+    # Uncomment below to save new set of posts
     # parser.get_page_data_file(url_access, main_file)
     page = parser.create_soup_file(main_file)
 
+    # Gets a list of posts for
     post_links_list = parser.get_post_links(page)
-    # print(post_links_array)
-    # test_page_data = parser.get_page_data(titles[3])
-    # test_page_soup = parser.create_soup(test_page_data)
-    parser.save_posts(parser.get_post_data(post_links_list), save_file)
+    # Saves post data to a file
+    parser.save_posts(parser.get_post_data(post_links_list), post_save_file)
