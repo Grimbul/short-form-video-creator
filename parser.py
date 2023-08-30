@@ -35,6 +35,7 @@ class Parser:
                 elif error.code == GATEWAY_TIMEOUT:
                     print(f"Error 504, gateway timeout. Retry number {i}")
                     time.sleep(20)
+        raise ValueError("Exceeded max attempts. Rerun the program")
 
     def get_page_data_file(self, url, filename):
         """
@@ -90,7 +91,7 @@ class Parser:
             if "/comments/" in link and "old.reddit.com" in link:
                 posts.append(link)
 
-        return posts[num_pinned_posts:]
+        return posts[num_pinned_posts:4]
 
     def find_num_pinned(self, soup):
         """
@@ -184,7 +185,7 @@ class Parser:
         :param save_file: file to write posts to
         """
 
-        with open(save_file, 'w') as writer:
+        with open(save_file, 'w', encoding='utf-8') as writer:
             for title in post_dictionary:
                 body = post_dictionary[title]
 
