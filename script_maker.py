@@ -36,40 +36,64 @@ class VideoEditor:
         :return: list of audio clips
         """
 
-        index = 0
+        TEMP_AUDIO_PATH = "./temp_audio/"
+
         clip_list = []
-        for post in post_sentence_list:
+        for index, post in enumerate(post_sentence_list):
             for sentence in post:
                 if sentence != '':
-                    temp_filename = f"temp{index}.mp3"
+                    temp_filename = f"tts_temp{index}.mp3"
 
                     TTS_audio = gTTS(text=sentence, lang='en', slow=False)
-                    TTS_audio.save("./temp_audio/" + temp_filename)
+                    TTS_audio.save(TEMP_AUDIO_PATH + temp_filename)
 
-                    audio_clip = AudioFileClip("./temp_audio/" + temp_filename)
+                    audio_clip = AudioFileClip(TEMP_AUDIO_PATH + temp_filename)
                     clip_list.append(audio_clip)
-                    index += 1
-
 
         # final_audio = concatenate_audioclips(create_audio_list(test_list))
         # final_audio.write_audiofile("output.mp3")
 
         return clip_list
 
+    def delete_temp_audio(self, directory):
+        """
+        Deletes all audio clips in a directory
+        :param directory: name of directory to delete clips from
+        """
+
+        for audio_file in os.listdir(directory):
+            if audio_file.endswith(".mp3"):
+                os.remove(directory+audio_file)
+
+    def create_final_audio(self, clip_list):
+        """
+        Combines audio clips from a clip list to create a final audio clip
+        :param clip_list: list of audio clips
+        """
+
+        TEMP_AUDIO_PATH = "./temp_audio/"
+        FINAL_AUDIO_PATH = "./final_video/"
+
+        final_audio = concatenate_audioclips(clip_list)
+        final_audio.write_audiofile(FINAL_AUDIO_PATH + "tts_final_audio.mp3")
+
+        self.delete_temp_audio(TEMP_AUDIO_PATH)
 
 
 
 """
 Video editor
 
-- Convert script to audio file
-- combine audio files to make final single file
-- manage files and delete unused ones
-- create captions for video
+- Convert script to audio file DONE
+- combine audio files to make final single file ACTIVE
+- manage files and delete unused ones DONE
+- create captions for video NOT STARTED
 """
 
 if __name__ == "__main__":
     VE = VideoEditor()
 
     happy = VE.get_sentences("temp_text.txt")
-    VE.convert_file_temp_audio(happy)
+    sad = VE.convert_file_temp_audio(happy)
+    VE.create_final_audio(sad)
+    os.system("start ./final_video/tts_final_audio.mp3")
