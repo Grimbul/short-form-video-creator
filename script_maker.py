@@ -1,6 +1,7 @@
 from gtts import gTTS
 from moviepy.editor import *
 
+
 class VideoEditor:
 
     def get_sentences(self, text_file):
@@ -28,7 +29,6 @@ class VideoEditor:
                 current_line = reader.readline()
         return post_list
 
-
     def convert_file_temp_audio(self, post_sentence_list):
         """
         Converts text from a text file to GTTS audio clips
@@ -39,20 +39,22 @@ class VideoEditor:
         TEMP_AUDIO_PATH = "./temp_audio/"
 
         clip_list = []
-        for index, post in enumerate(post_sentence_list):
+        index = 0
+        for post in post_sentence_list:
             for sentence in post:
                 if sentence != '':
-                    temp_filename = f"tts_temp{index}.mp3"
+                    temp_filename = TEMP_AUDIO_PATH + f"tts_temp{index}.mp3"
 
                     TTS_audio = gTTS(text=sentence, lang='en', slow=False)
-                    TTS_audio.save(TEMP_AUDIO_PATH + temp_filename)
+                    TTS_audio.save(temp_filename)
 
-                    audio_clip = AudioFileClip(TEMP_AUDIO_PATH + temp_filename)
+                    audio_clip = AudioFileClip(temp_filename)
+                    audio_clip = audio_clip.set_end(audio_clip.duration - 1.3)
+                    audio_clip.write_audiofile(temp_filename, verbose=False, logger=None)
+
                     clip_list.append(audio_clip)
 
-        # final_audio = concatenate_audioclips(create_audio_list(test_list))
-        # final_audio.write_audiofile("output.mp3")
-
+                    index += 1
         return clip_list
 
     def delete_temp_audio(self, directory):
@@ -62,8 +64,9 @@ class VideoEditor:
         """
 
         for audio_file in os.listdir(directory):
-            if audio_file.endswith(".mp3"):
-                os.remove(directory+audio_file)
+            if audio_file.endswith(".mp3") or audio_file.endswith(".log"):
+                print("worked")
+                os.remove(directory + audio_file)
 
     def create_final_audio(self, clip_list):
         """
@@ -77,8 +80,7 @@ class VideoEditor:
         final_audio = concatenate_audioclips(clip_list)
         final_audio.write_audiofile(FINAL_AUDIO_PATH + "tts_final_audio.mp3")
 
-        self.delete_temp_audio(TEMP_AUDIO_PATH)
-
+        #self.delete_temp_audio(TEMP_AUDIO_PATH)
 
 
 """
