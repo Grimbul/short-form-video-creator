@@ -49,8 +49,9 @@ class VideoEditor:
                     TTS_audio.save(temp_filename)
 
                     audio_clip = AudioFileClip(temp_filename)
-                    audio_clip = audio_clip.set_end(audio_clip.duration - 1.3)
+                    audio_clip = audio_clip.set_end(audio_clip.duration - 0.3)
                     audio_clip.write_audiofile(temp_filename, verbose=False, logger=None)
+                    audio_clip.close()
 
                     clip_list.append(audio_clip)
 
@@ -64,8 +65,9 @@ class VideoEditor:
         """
 
         for audio_file in os.listdir(directory):
-            if audio_file.endswith(".mp3") or audio_file.endswith(".log"):
-                print("worked")
+            if audio_file.endswith(".mp3"):
+                clip = AudioFileClip(directory + audio_file)
+                clip.close()
                 os.remove(directory + audio_file)
 
     def create_final_audio(self, clip_list):
@@ -78,7 +80,7 @@ class VideoEditor:
         FINAL_AUDIO_PATH = "./final_video/"
 
         final_audio = concatenate_audioclips(clip_list)
-        final_audio.write_audiofile(FINAL_AUDIO_PATH + "tts_final_audio.mp3")
+        final_audio.write_audiofile(FINAL_AUDIO_PATH + "tts_final_audio.mp3", verbose=False, logger=None)
 
         #self.delete_temp_audio(TEMP_AUDIO_PATH)
 
