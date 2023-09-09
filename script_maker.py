@@ -49,7 +49,7 @@ class VideoEditor:
                     TTS_audio.save(temp_filename)
 
                     audio_clip = AudioFileClip(temp_filename)
-                    audio_clip = audio_clip.set_end(audio_clip.duration - 0.3)
+                    audio_clip = audio_clip.set_duration(audio_clip.duration - 0.3)
                     audio_clip.write_audiofile(temp_filename, verbose=False, logger=None)
                     audio_clip.close()
 
