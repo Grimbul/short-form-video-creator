@@ -39,57 +39,42 @@ class VideoEditor:
 
         TEMP_AUDIO_PATH = "./temp_audio/"
 
-        clip_list = []
-        index = 0
-        for post in post_sentence_list:
-            for sentence in post:
+        for post_num, post in enumerate(post_sentence_list):
+            os.mkdir(f"{TEMP_AUDIO_PATH}post{post_num}")
+            for sentence_num, sentence in enumerate(post):
                 if post != '':
-                    temp_filename = f"{TEMP_AUDIO_PATH}tts_temp{index}.mp3"
+                    temp_filename = f"{TEMP_AUDIO_PATH}tts_temp{sentence_num}.mp3"
 
                     TTS_audio = gTTS(text=sentence, lang='en', slow=False)
                     TTS_audio.save(temp_filename)
 
-                    """audio_clip = AudioFileClip(temp_filename)
-                    audio_clip = audio_clip.set_duration(audio_clip.duration - 0.3)
-                    audio_clip.write_audiofile(temp_filename, verbose=False, logger=None)
-                    audio_clip.close()
-                    """
-
-                    #clip_list.append(audio_clip)
-
-                    index += 1
-        return clip_list
-
     def delete_temp_audio(self, directory):
         """
-        Deletes all audio clips in a directory
-        :param directory: name of directory to delete clips from
+        Deletes all temporary directories
+        :param directory: name of directory to delete temp directories from
         """
 
-        for audio_file in os.listdir(directory):
-            if audio_file.endswith(".mp3"):
-                os.remove(directory + audio_file)
+        for dir in os.listdir(directory):
+            if directory.startswith("post"):
+                os.remove(dir)
 
     def create_final_audio(self, clip_directory):
         """
-        Combines audio clips from a clip list to create a final audio clip
-        :param clip_list: list of audio clips
+        Combines audio clips from a clip directory to create a final audio clip
+        :param clip_directory: list of audio clips
         """
 
         TEMP_AUDIO_PATH = "./temp_audio/"
         FINAL_AUDIO_PATH = "./final_video/"
 
         combined = AudioSegment.empty()
-        for d in os.listdir(clip_directory):
-            clip = AudioSegment.from_mp3(d)
-            combined += clip
+        for audio_clip in os.listdir(TEMP_AUDIO_PATH + clip_directory):
+            audio_clip = AudioSegment.from_mp3(audio_clip)
+            combined += audio_clip
 
-        combined.export(FINAL_AUDIO_PATH, format="mp3")
+        combined.export(FINAL_AUDIO_PATH + clip_directory, format="mp3")
 
-        """final_audio = concatenate_audioclips(clip_list)
-        final_audio.write_audiofile(FINAL_AUDIO_PATH + "tts_final_audio.mp3", verbose=False, logger=None)"""
-
-        #self.delete_temp_audio(TEMP_AUDIO_PATH)
+        self.delete_temp_audio(TEMP_AUDIO_PATH)
 
 
 """
@@ -104,7 +89,7 @@ Video editor
 if __name__ == "__main__":
     VE = VideoEditor()
 
-    happy = VE.get_sentences("temp_text.txt")
-    VE.convert_file_temp_audio(happy)
-    VE.create_final_audio("./temp_audio/")
-    os.system("start ./final_video/tts_final_audio.mp3")
+    post_list = VE.get_sentences("temp_text.txt")
+    VE.convert_file_temp_audio(post_list)
+    VE.create_final_audio("post0")
+    os.system("start ./final_video/post0.mp3")
