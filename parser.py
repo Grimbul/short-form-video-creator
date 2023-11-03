@@ -10,6 +10,10 @@ Manages html data
 
 class Parser:
 
+    """
+    Try something with get.text()
+    """
+
     def http_error_handler(self, url):
         """
         Handles errors from accessing an url

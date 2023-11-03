@@ -1,5 +1,6 @@
 from gtts import gTTS
 from moviepy.editor import *
+from pydub import *
 
 
 class VideoEditor:
@@ -42,18 +43,19 @@ class VideoEditor:
         index = 0
         for post in post_sentence_list:
             for sentence in post:
-                if sentence != '':
-                    temp_filename = TEMP_AUDIO_PATH + f"tts_temp{index}.mp3"
+                if post != '':
+                    temp_filename = f"{TEMP_AUDIO_PATH}tts_temp{index}.mp3"
 
                     TTS_audio = gTTS(text=sentence, lang='en', slow=False)
                     TTS_audio.save(temp_filename)
 
-                    audio_clip = AudioFileClip(temp_filename)
+                    """audio_clip = AudioFileClip(temp_filename)
                     audio_clip = audio_clip.set_duration(audio_clip.duration - 0.3)
                     audio_clip.write_audiofile(temp_filename, verbose=False, logger=None)
                     audio_clip.close()
+                    """
 
-                    clip_list.append(audio_clip)
+                    #clip_list.append(audio_clip)
 
                     index += 1
         return clip_list
@@ -66,11 +68,9 @@ class VideoEditor:
 
         for audio_file in os.listdir(directory):
             if audio_file.endswith(".mp3"):
-                clip = AudioFileClip(directory + audio_file)
-                clip.close()
                 os.remove(directory + audio_file)
 
-    def create_final_audio(self, clip_list):
+    def create_final_audio(self, clip_directory):
         """
         Combines audio clips from a clip list to create a final audio clip
         :param clip_list: list of audio clips
@@ -79,8 +79,15 @@ class VideoEditor:
         TEMP_AUDIO_PATH = "./temp_audio/"
         FINAL_AUDIO_PATH = "./final_video/"
 
-        final_audio = concatenate_audioclips(clip_list)
-        final_audio.write_audiofile(FINAL_AUDIO_PATH + "tts_final_audio.mp3", verbose=False, logger=None)
+        combined = AudioSegment.empty()
+        for d in os.listdir(clip_directory):
+            clip = AudioSegment.from_mp3(d)
+            combined += clip
+
+        combined.export(FINAL_AUDIO_PATH, format="mp3")
+
+        """final_audio = concatenate_audioclips(clip_list)
+        final_audio.write_audiofile(FINAL_AUDIO_PATH + "tts_final_audio.mp3", verbose=False, logger=None)"""
 
         #self.delete_temp_audio(TEMP_AUDIO_PATH)
 
@@ -98,6 +105,6 @@ if __name__ == "__main__":
     VE = VideoEditor()
 
     happy = VE.get_sentences("temp_text.txt")
-    sad = VE.convert_file_temp_audio(happy)
-    VE.create_final_audio(sad)
+    VE.convert_file_temp_audio(happy)
+    VE.create_final_audio("./temp_audio/")
     os.system("start ./final_video/tts_final_audio.mp3")
