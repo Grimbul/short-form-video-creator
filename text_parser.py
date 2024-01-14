@@ -207,20 +207,14 @@ class Parser:
 
         post_string = ""
 
-        with open(post_filename, 'r', encoding="utf-8") as reader:
-            current_line = reader.readline()
-            while current_line:
-                print(current_line)
-                if current_line.endswith(str(post_number) + "\n"):
-                    current_line = reader.readline()
+        with open(post_filename, 'r', encoding="utf-8") as read_file:
+            post_list = read_file.readlines()
+        post_start = post_list.index(f"Post number: {post_number}\n")
+        post_end = post_list[post_start:].index("\n")
 
-                    while current_line != "\n":
-                        post_string.join(current_line.strip())
-                    return post_string
-                else:
-                    current_line = reader.readline()
-
-            raise ValueError("Post number not found. Given post number may be out of bounds.")
+        for line in post_list[post_start + 1:post_end]:
+            post_string += line
+        return post_string
 
 
 if __name__ == "__main__":

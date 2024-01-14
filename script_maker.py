@@ -15,10 +15,13 @@ class VideoEditor:
         """
 
         AUDIO_FILENAME = f"post_audio.mp3"
-        audio_path = f"/{audio_directory}/"
+        audio_path = f"{audio_directory}/{AUDIO_FILENAME}"
 
         TTS_audio = gTTS(text=post, lang='en', slow=False)
-        TTS_audio.save(audio_path.join(AUDIO_FILENAME))
+        TTS_audio.save(audio_path)
+
+    def create_subtitles(self):
+
 
 """
 Video editor
